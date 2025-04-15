@@ -1,119 +1,223 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartNet - تقييم الموظفين</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تقييم الموظفين</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: white;
-      color: black;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f7f7f7;
+      color: #000;
       transition: background-color 0.3s, color 0.3s;
     }
-    body.dark-mode {
+
+    .dark-mode {
       background-color: #121212;
-      color: #f0f0f0;
+      color: #fff;
     }
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
+
     h1 {
       text-align: center;
     }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
     }
+
+    input[type="text"], button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 30px;
+      background-color: #fff;
     }
-    table, th, td {
-      border: 1px solid #ccc;
+
+    .dark-mode table {
+      background-color: #1e1e1e;
     }
+
     th, td {
-      padding: 10px;
+      padding: 12px;
+      border: 1px solid #ddd;
       text-align: center;
     }
-    .dark-mode table, .dark-mode th, .dark-mode td {
-      border-color: #555;
-    }
-    .dark-mode input[type="text"] {
-      background-color: #333;
-      color: #fff;
-      border-color: #555;
-    }
-    .toggle-btn {
-      padding: 10px 15px;
-      margin-bottom: 15px;
-      border: none;
-      background-color: #007bff;
+
+    th {
+      background-color: #4CAF50;
       color: white;
-      border-radius: 5px;
-      cursor: pointer;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .dark-mode tr:hover {
+      background-color: #333;
+    }
+
+    .cart-list {
+      margin-top: 20px;
+      background: #e0e0e0;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .dark-mode .cart-list {
+      background-color: #2c2c2c;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>تقييم الموظفين</h1>
-    <button class="toggle-btn" onclick="toggleDarkMode()">تفعيل/إيقاف الوضع الليلي</button>
-    <input type="text" id="searchInput" placeholder="ابحث عن موظف...">
-    <table id="dataTable">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
+
+  <h1>تقييم الموظفين</h1>
+
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="ابحث عن موظف بالاسم...">
+    <button onclick="exportToExcel()">📤 تصدير Excel</button>
+    <button onclick="toggleDarkMode()">🌓 وضع ليلي/نهاري</button>
+    <button onclick="viewCart()">🛒 عرض الموظفين المميزين</button>
+  </div>
+
+  <table id="employeeTable">
+    <thead>
+      <tr id="tableHead"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <div class="cart-list" id="cartList" style="display:none;">
+    <h3>🛍️ سلة الموظفين المميزين:</h3>
+    <ul id="cartItems"></ul>
   </div>
 
   <script>
-    const sheetURL = "https://script.google.com/macros/s/AKfycbyAqOQOai7iyRXUDtm2y79HFhezOUqgfJZz60MNwhZG_VuC41370NNgPu0rRbsIX8bsFQ/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyAqOQOai7iyRXUDtm2y79HFhezOUqgfJZz60MNwhZG_VuC41370NNgPu0rRbsIX8bsFQ/exec";
+    let employeeData = [];
+    let cart = [];
 
-    fetch(sheetURL)
+    fetch(scriptURL)
       .then(res => res.json())
       .then(data => {
-        const tableHead = document.querySelector("#dataTable thead");
-        const tableBody = document.querySelector("#dataTable tbody");
-
-        if (data.length === 0) return;
-
-        const headers = Object.keys(data[0]);
-        let headerRow = "<tr>";
-        headers.forEach(header => {
-          headerRow += `<th>${header}</th>`;
-        });
-        headerRow += "</tr>";
-        tableHead.innerHTML = headerRow;
-
-        data.forEach(row => {
-          let rowHTML = "<tr>";
-          headers.forEach(header => {
-            rowHTML += `<td>${row[header]}</td>`;
-          });
-          rowHTML += "</tr>";
-          tableBody.innerHTML += rowHTML;
-        });
+        employeeData = data;
+        renderTable(data);
       });
+
+    function renderTable(data) {
+      const headers = Object.keys(data[0]);
+      const tableHead = document.getElementById("tableHead");
+      const tableBody = document.getElementById("tableBody");
+
+      tableHead.innerHTML = "";
+      headers.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        tableHead.appendChild(th);
+      });
+      const actionTh = document.createElement("th");
+      actionTh.textContent = "إجراء";
+      tableHead.appendChild(actionTh);
+
+      tableBody.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        headers.forEach(header => {
+          const td = document.createElement("td");
+          td.textContent = row[header];
+          tr.appendChild(td);
+        });
+
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "⭐ أضف";
+        addBtn.onclick = () => addToCart(row["الاسم"] || row[headers[0]]);
+        const td = document.createElement("td");
+        td.appendChild(addBtn);
+        tr.appendChild(td);
+
+        tableBody.appendChild(tr);
+      });
+    }
 
     document.getElementById("searchInput").addEventListener("keyup", function () {
-      const filter = this.value.toLowerCase();
-      const rows = document.querySelectorAll("#dataTable tbody tr");
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(filter) ? "" : "none";
-      });
+      const val = this.value.toLowerCase();
+      const filtered = employeeData.filter(emp => emp[Object.keys(emp)[0]].toLowerCase().includes(val));
+      renderTable(filtered);
     });
+
+    function exportToExcel() {
+      let csv = "";
+      const rows = document.querySelectorAll("table tr");
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("th, td");
+        let rowText = [];
+        cols.forEach(col => {
+          rowText.push('"' + col.innerText + '"');
+        });
+        csv += rowText.join(",") + "\n";
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "تقييم_الموظفين.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
 
     function toggleDarkMode() {
       document.body.classList.toggle("dark-mode");
     }
+
+    function addToCart(name) {
+      if (!cart.includes(name)) {
+        cart.push(name);
+        alert(`تمت إضافة ${name} إلى سلة الموظفين المميزين!`);
+      } else {
+        alert(`${name} موجود بالفعل في السلة.`);
+      }
+    }
+
+    function viewCart() {
+      const cartList = document.getElementById("cartList");
+      const cartItems = document.getElementById("cartItems");
+      cartItems.innerHTML = "";
+      cart.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        cartItems.appendChild(li);
+      });
+      cartList.style.display = cart.length ? "block" : "none";
+    }
   </script>
+
 </body>
 </html>
