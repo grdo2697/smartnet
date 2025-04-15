@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartNet - الموظفين المميزين</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem 0;
+        }
+        main {
+            padding: 2rem;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .dark-mode {
+            background-color: #222;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SmartNet - لوحة الموظفين المميزين</h1>
+    </header>
+    <main>
+        <p>مرحباً بك في الموقع الرسمي لتقييم الموظفين.</p>
+        <button onclick="toggleDarkMode()">الوضع الليلي</button>
+        <button onclick="exportTableToExcel()">تصدير Excel</button>
+        <button onclick="alert('قريباً: سلة الموظفين المميزين!')">سلة الموظفين المميزين</button>
+        <table border="1" id="employeeTable" style="margin-top: 20px; width: 100%;">
+            <thead>
+                <tr><th>الاسم</th><th>القسم</th><th>التقييم</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>أحمد</td><td>المبيعات</td><td>ممتاز</td></tr>
+                <tr><td>سارة</td><td>الدعم الفني</td><td>جيد جداً</td></tr>
+            </tbody>
+        </table>
+    </main>
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+        function exportTableToExcel() {
+            let table = document.getElementById("employeeTable");
+            let html = table.outerHTML;
+            let url = 'data:application/vnd.ms-excel,' + escape(html);
+            let link = document.createElement("a");
+            link.href = url;
+            link.download = "employee_data.xls";
+            link.click();
+        }
+    </script>
+</body>
+</html>
