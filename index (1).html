@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartNet - تقييم الموظفين</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: white;
+      color: black;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark-mode {
+      background-color: #121212;
+      color: #f0f0f0;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    .dark-mode table, .dark-mode th, .dark-mode td {
+      border-color: #555;
+    }
+    .dark-mode input[type="text"] {
+      background-color: #333;
+      color: #fff;
+      border-color: #555;
+    }
+    .toggle-btn {
+      padding: 10px 15px;
+      margin-bottom: 15px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>تقييم الموظفين</h1>
+    <button class="toggle-btn" onclick="toggleDarkMode()">تفعيل/إيقاف الوضع الليلي</button>
+    <input type="text" id="searchInput" placeholder="ابحث عن موظف...">
+    <table id="dataTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const sheetURL = "https://script.google.com/macros/s/AKfycbyAqOQOai7iyRXUDtm2y79HFhezOUqgfJZz60MNwhZG_VuC41370NNgPu0rRbsIX8bsFQ/exec";
+
+    fetch(sheetURL)
+      .then(res => res.json())
+      .then(data => {
+        const tableHead = document.querySelector("#dataTable thead");
+        const tableBody = document.querySelector("#dataTable tbody");
+
+        if (data.length === 0) return;
+
+        const headers = Object.keys(data[0]);
+        let headerRow = "<tr>";
+        headers.forEach(header => {
+          headerRow += `<th>${header}</th>`;
+        });
+        headerRow += "</tr>";
+        tableHead.innerHTML = headerRow;
+
+        data.forEach(row => {
+          let rowHTML = "<tr>";
+          headers.forEach(header => {
+            rowHTML += `<td>${row[header]}</td>`;
+          });
+          rowHTML += "</tr>";
+          tableBody.innerHTML += rowHTML;
+        });
+      });
+
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+      const filter = this.value.toLowerCase();
+      const rows = document.querySelectorAll("#dataTable tbody tr");
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+      });
+    });
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+  </script>
+</body>
+</html>
