@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <title>إدارة الفريق</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>أعضاء الفريق</h1>
+        <button onclick="showAddForm()">إضافة عضو</button>
+        <div id="teamList"></div>
+    </div>
+
+    <!-- نموذج إضافة عضو -->
+    <div id="addMemberModal" class="modal">
+        <form id="addForm">
+            <input type="text" id="memberName" placeholder="الاسم" required>
+            <input type="email" id="memberEmail" placeholder="البريد الإلكتروني" required>
+            <select id="memberRole">
+                <option value="فني">فني</option>
+                <option value="مدير">مدير</option>
+            </select>
+            <button type="submit">حفظ</button>
+        </form>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+        // تحميل بيانات الفريق
+        let team = JSON.parse(localStorage.getItem('team')) || [];
+        renderTeam();
+
+        // إضافة عضو جديد
+        document.getElementById('addForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newMember = {
+                id: Date.now(),
+                name: document.getElementById('memberName').value,
+                email: document.getElementById('memberEmail').value,
+                role: document.getElementById('memberRole').value
+            };
+            team.push(newMember);
+            localStorage.setItem('team', JSON.stringify(team));
+            renderTeam();
+            hideAddForm();
+        });
+
+        // عرض البيانات
+        function renderTeam() {
+            const html = team.map(member => `
+                <div class="member-card">
+                    <h3>${member.name}</h3>
+                    <p>${member.email}</p>
+                    <p>الدور: ${member.role}</p>
+                    <button onclick="deleteMember(${member.id})">حذف</button>
+                </div>
+            `).join('');
+            document.getElementById('teamList').innerHTML = html;
+        }
+
+        function deleteMember(id) {
+            team = team.filter(member => member.id !== id);
+            localStorage.setItem('team', JSON.stringify(team));
+            renderTeam();
+        }
+    </script>
+</body>
+</html>
