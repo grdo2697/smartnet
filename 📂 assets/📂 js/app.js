@@ -1,66 +1,52 @@
-function checkAuth() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser && window.location.pathname.endsWith('team.html')) {
-        window.location.href = 'index.html';
-    }
-}
-
-function logout() {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'index.html';
-}
-
-// إدارة الفريق
-let team = JSON.parse(localStorage.getItem('team')) || [];
-
-function addMember(name, email, role) {
-    const newMember = {
-        id: Date.now(),
-        name,
-        email,
-        role
+// ============== إدارة الأعضاء ==============
+function addMember(username, password) {
+    const users = JSON.parse(localStorage.getItem('users'));
+    const newUser = {
+        username,
+        password,
+        role: 'member'
     };
-    team.push(newMember);
-    localStorage.setItem('team', JSON.stringify(team));
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
     renderTeam();
 }
 
-function deleteMember(id) {
-    team = team.filter(member => member.id !== id);
-    localStorage.setItem('team', JSON.stringify(team));
+function deleteMember(username) {
+    const users = JSON.parse(localStorage.getItem('users'))
+                    .filter(user => user.username !== username);
+    localStorage.setItem('users', JSON.stringify(users));
     renderTeam();
 }
 
 function renderTeam() {
-    const teamContainer = document.getElementById('teamList');
-    teamContainer.innerHTML = team.map(member => `
+    const teamList = document.getElementById('teamList');
+    const users = JSON.parse(localStorage.getItem('users'))
+                    .filter(user => user.role === 'member');
+    
+    teamList.innerHTML = users.map(user => `
         <div class="member-card">
-            <h3>${member.name}</h3>
-            <p>${member.email}</p>
-            <p>الدور: ${member.role}</p>
-            <button onclick="deleteMember(${member.id})">حذف</button>
+            <div class="member-info">
+                <span class="member-username">${user.username}</span>
+                <span class="member-password">${user.password}</span>
+            </div>
+            <button onclick="deleteMember('${user.username}')">حذف</button>
         </div>
     `).join('');
 }
 
-// الأحداث
+// ============== الأحداث ==============
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     renderTeam();
     
     document.getElementById('addForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        addMember(
-            document.getElementById('memberName').value,
-            document.getElementById('memberEmail').value,
-            document.getElementById('memberRole').value
-        );
-        document.getElementById('addMemberModal').style.display = 'none';
+        const username = document.getElementById('memberUser').value;
+        const password = document.getElementById('memberPass').value;
+        
+        if (username && password) {
+            addMember(username, password);
+            document.getElementById('addMemberModal').style.display = 'none';
+        }
     });
-
-    document.getElementById('logoutBtn').addEventListener('click', logout);
 });
-
-function showAddForm() {
-    document.getElementById('addMemberModal').style.display = 'flex';
-}
