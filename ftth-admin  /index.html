@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html dir="rtl">
 <head>
-    <title>تسجيل الدخول</title>
+    <title>تسجيل الدخول - نظام FTTH</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -16,14 +16,24 @@
 
     <script src="assets/js/app.js"></script>
     <script>
-        // بيانات المستخدمين الافتراضية
+        // بيانات المستخدمين الافتراضية (المسؤول + أعضاء)
         if (!localStorage.getItem('users')) {
             const users = [
-                { username: 'admin', password: 'admin123', role: 'admin' }
+                { 
+                    username: 'admin', 
+                    password: 'admin123', 
+                    role: 'admin' // صلاحيات مدير
+                },
+                {
+                    username: 'user1',
+                    password: '123456',
+                    role: 'member'
+                }
             ];
             localStorage.setItem('users', JSON.stringify(users));
         }
 
+        // التحقق من بيانات الدخول
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
