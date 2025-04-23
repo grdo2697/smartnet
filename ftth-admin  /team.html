@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <title>إدارة الفريق</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <button id="logoutBtn" style="position: fixed; left: 20px; top: 20px;">تسجيل الخروج</button>
+    <div class="container">
+        <h1>أعضاء الفريق</h1>
+        <button onclick="showAddForm()">إضافة عضو</button>
+        <div id="teamList"></div>
+    </div>
+
+    <!-- نافذة إضافة عضو -->
+    <div id="addMemberModal" class="modal">
+        <form id="addForm">
+            <input type="text" id="memberName" placeholder="الاسم" required>
+            <input type="email" id="memberEmail" placeholder="البريد الإلكتروني" required>
+            <select id="memberRole">
+                <option value="فني">فني</option>
+                <option value="مدير">مدير</option>
+            </select>
+            <button type="submit">حفظ</button>
+        </form>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
